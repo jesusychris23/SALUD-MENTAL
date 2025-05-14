@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integral de Salud Mental - Hospital XYZ</title>
+    <style>
+        :root {
+            --color-fondo: #e6f2ff;
+            --color-texto: #003366;
+            --color-botones: #0066cc;
+            --color-encabezado: #004080;
+            --color-secundario: #009999;
+            --color-disponible: #e6ffe6;
+            --color-no-disponible: #ffe6e6;
+            --color-admin: #663399;
+        }
+        
+        body {
+            font-family: 'Helvetica', Arial, sans-serif;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: var(--color-encabezado);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .selection-window {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 50px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .selection-title {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: var(--color-texto);
+        }
+        
+        .btn {
+            display: block;
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-user {
+            background-color: var(--color-botones);
+        }
+        
+        .btn-admin {
+            background-color: var(--color-admin);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .submit-btn {
+            background-color: var(--color-botones);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .submit-btn:hover {
+            background-color: #0055aa;
+        }
+        
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        
+        /* Estilos para la interfaz de usuario */
+        .condition-selector {
+            margin-bottom: 30px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            flex: 1 1 300px;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--color-encabezado);
+        }
+        
+        .available {
+            background-color: var(--color-disponible);
+        }
+        
+        .unavailable {
+            background-color: var(--color-no-disponible);
+        }
+        
+        .back-btn {
+            background-color: var(--color-secundario);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            ⚕ HOSPITAL XYZ - SISTEMA INTEGRAL DE SALUD MENTAL
+        </div>
+        
+        <div id="selection-window" class="selection-window">
+            <div class="selection-title">
+                Por favor, seleccione su tipo de usuario:
+            </div>
+            
+            <button id="btn-user" class="btn btn-user">
+                USUARIO<br><br>
+                Soy paciente o familiar buscando información<br>
+                sobre salud mental y medicamentos disponibles
+            </button>
+            
+            <button id="btn-admin" class="btn btn-admin">
+                DUEÑO DE FARMACIA<br><br>
+                Soy administrador y necesito actualizar<br>
+                la disponibilidad de medicamentos en mi farmacia
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal para contraseña -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Contraseña</h2>
+            <p>Ingrese la contraseña para acceder al modo Farmacia:</p>
+            <div class="form-group">
+                <input type="password" id="password-input" placeholder="Contraseña">
+            </div>
+            <button id="submit-password" class="submit-btn">Ingresar</button>
+            <div id="error-message" class="error-message"></div>
+        </div>
+    </div>
+    
+    <!-- Interfaz de usuario -->
+    <div id="user-interface" class="container" style="display: none;">
+        <div class="header">
+            ⚕ HOSPITAL XYZ - MODO USUARIO
+        </div>
+        
+        <div class="condition-selector">
+            <label for="condition-select">Seleccione una condición de salud mental:</label>
+            <select id="condition-select">
+                <option value="">-- Seleccione una opción --</option>
+                <option value="Ansiedad">Ansiedad</option>
+                <option value="Depresión">Depresión</option>
+                <option value="Estrés">Estrés</option>
+                <option value="Trastornos Alimenticios">Trastornos Alimenticios</option>
+                <option value="Adicciones">Adicciones</option>
+            </select>
+        </div>
+        
+        <div id="results-section">
+            <h3>Especialistas disponibles:</h3>
+            <div id="specialists-results" class="results-container"></div>
+            
+            <h3>Medicamentos disponibles:</h3>
+            <div id="medications-results" class="results-container"></div>
+        </div>
+        
+        <button id="back-to-selection" class="back-btn">Volver a la selección</button>
+    </div>
+    
+    <!-- Interfaz de farmacia -->
+    <div id="pharmacy-interface" class="container" style="display: none;">
+        <div class="header">
+            ⚕ HOSPITAL XYZ - MODO FARMACIA
+        </div>
+        
+        <div class="condition-selector">
+            <label for="pharmacy-condition-select">Seleccione una condición de salud mental:</label>
+            <select id="pharmacy-condition-select">
+                <option value="">-- Seleccione una opción --</option>
+                <option value="Ansiedad">Ansiedad</option>
+                <option value="Depresión">Depresión</option>
+                <option value="Estrés">Estrés</option>
+                <option value="Trastornos Alimenticios">Trastornos Alimenticios</option>
+                <option value="Adicciones">Adicciones</option>
+            </select>
+        </div>
+        
+        <div id="pharmacy-results-section">
+            <h3>Medicamentos disponibles:</h3>
+            <div id="pharmacy-medications-results" class="results-container"></div>
+        </div>
+        
+        <button id="pharmacy-back-to-selection" class="back-btn">Volver a la selección</button>
+    </div>
+    
+    <script>
+        // Base de datos de especialistas por zona
+        const ESPECIALISTAS_ZONA = {
+            "Ansiedad": [
+                "Dr. Carlos Méndez - Psiquiatra - Hospital Central (Zona Centro)",
+                "Dra. Laura Fernández - Psicóloga Clínica - Centro de Salud Mental Norte",
+                "Lic. Javier Ruiz - Terapeuta Cognitivo-Conductual - Clínica Privada Sur"
+            ],
+            "Depresión": [
+                "Dra. Ana Gutiérrez - Psiquiatra - Hospital General (Zona Este)",
+                "Lic. Patricia Díaz - Psicóloga - Centro Comunitario de Salud Mental",
+                "Dr. Roberto Sánchez - Psicoterapeuta - Clínica Privada Oeste"
+            ],
+            "Estrés": [
+                "Lic. Sofía Martínez - Psicóloga Especialista en Estrés - Centro de Relajación Integral",
+                "Dr. Luis Ortega - Psiquiatra - Hospital Regional (Zona Sur)",
+                "Dra. Elena Vargas - Terapeuta - Centro de Mindfulness Urbano"
+            ],
+            "Trastornos Alimenticios": [
+                "Dra. Carmen López - Psiquiatra Especialista - Hospital de Día Trastornos Alimentarios",
+                "Lic. Diego Castro - Psicólogo - Centro de Recuperación Nutricional",
+                "Equipo Multidisciplinar - Clínica Especializada en TCA"
+            ],
+            "Adicciones": [
+                "Dr. Fernando Torres - Psiquiatra - Centro de Desintoxicación Municipal",
+                "Lic. Adriana Soto - Psicóloga - Comunidad Terapéutica Zona Norte",
+                "Grupos de Apoyo - Asociación de Recuperación de Adicciones"
+            ]
+        };
+
+        // Base de datos de medicamentos por condición
+        const MEDICAMENTOS = {
+            "Ansiedad": [
+                {"nombre": "Sertralina", "tipo": "ISRS", "uso": "Tratamiento a largo plazo", "efectos": "Puede causar náuseas iniciales, mejora después de 2-4 semanas", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia del Pueblo", "Farmacia Salud Total"]},
+                {"nombre": "Paroxetina", "tipo": "ISRS", "uso": "Ansiedad generalizada y ataques de pánico", "efectos": "Puede causar somnolencia o insomnio", 
+                 "disponible": true, "farmacias": ["Farmacia del Pueblo", "Farmacia Bienestar"]},
+                {"nombre": "Alprazolam", "tipo": "Benzodiazepina", "uso": "Alivio rápido en crisis (uso limitado)", "efectos": "Riesgo de dependencia, solo uso corto", 
+                 "disponible": false, "farmacias": ["Farmacia Central"]},
+                {"nombre": "Buspirona", "tipo": "Ansiolítico no benzodiazepínico", "uso": "Ansiedad crónica sin riesgo de dependencia", "efectos": "Efecto gradual (2-4 semanas)", 
+                 "disponible": true, "farmacias": ["Farmacia Salud Total", "Farmacia Vida Sana"]}
+            ],
+            "Depresión": [
+                {"nombre": "Fluoxetina", "tipo": "ISRS", "uso": "Depresión mayor, TOC", "efectos": "Activador, mejor tomarlo por la mañana", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia del Pueblo", "Farmacia Bienestar", "Farmacia Salud Total"]},
+                {"nombre": "Escitalopram", "tipo": "ISRS", "uso": "Depresión y ansiedad comórbida", "efectos": "Buen perfil de efectos secundarios", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia Vida Sana"]},
+                {"nombre": "Venlafaxina", "tipo": "IRSN", "uso": "Depresión resistente", "efectos": "Puede aumentar presión arterial", 
+                 "disponible": false, "farmacias": ["Farmacia del Pueblo"]},
+                {"nombre": "Bupropión", "tipo": "NDRI", "uso": "Depresión con síntomas de fatiga", "efectos": "Puede ayudar a dejar de fumar", 
+                 "disponible": true, "farmacias": ["Farmacia Salud Total"]}
+            ],
+            "Estrés": [
+                {"nombre": "Diazepam", "tipo": "Benzodiazepina", "uso": "Estrés agudo (uso muy limitado)", "efectos": "Solo para crisis ocasionales", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia del Pueblo"]},
+                {"nombre": "Propranolol", "tipo": "Betabloqueante", "uso": "Síntomas físicos de estrés", "efectos": "Reduce taquicardia y temblores", 
+                 "disponible": true, "farmacias": ["Farmacia Bienestar", "Farmacia Salud Total", "Farmacia Vida Sana"]},
+                {"nombre": "Hydroxyzina", "tipo": "Antihistamínico", "uso": "Ansiedad leve a moderada", "efectos": "Sedación leve, menos riesgo de dependencia", 
+                 "disponible": false, "farmacias": ["Farmacia Central", "Farmacia del Pueblo"]}
+            ],
+            "Trastornos Alimenticios": [
+                {"nombre": "Fluoxetina", "tipo": "ISRS", "uso": "Bulimia nerviosa", "efectos": "Reduce los atracones y purgas", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia del Pueblo", "Farmacia Bienestar"]},
+                {"nombre": "Olanzapina", "tipo": "Antipsicótico atípico", "uso": "Anorexia nerviosa (aumento de peso)", "efectos": "Puede causar sedación y aumento de peso", 
+                 "disponible": true, "farmacias": ["Farmacia Salud Total"]},
+                {"nombre": "Topiramato", "tipo": "Anticonvulsivo", "uso": "Trastorno por atracón", "efectos": "Reduce la frecuencia de atracones", 
+                 "disponible": false, "farmacias": ["Farmacia del Pueblo", "Farmacia Vida Sana"]}
+            ],
+            "Adicciones": [
+                {"nombre": "Metadona", "tipo": "Opioide sintético", "uso": "Dependencia a opiáceos", "efectos": "Solo en programas especializados", 
+                 "disponible": true, "farmacias": ["Farmacia del Programa de Adicciones"]},
+                {"nombre": "Naltrexona", "tipo": "Antagonista opioide", "uso": "Alcoholismo y dependencia opioide", "efectos": "Reduce el craving y efectos placenteros", 
+                 "disponible": true, "farmacias": ["Farmacia Central", "Farmacia Salud Total"]},
+                {"nombre": "Acamprosato", "tipo": "Modulador glutamatérgico", "uso": "Mantenimiento de abstinencia al alcohol", "efectos": "Reduce el deseo de beber", 
+                 "disponible": false, "farmacias": ["Farmacia Bienestar"]},
+                {"nombre": "Buprenorfina", "tipo": "Opioide parcial", "uso": "Dependencia a opiáceos", "efectos": "Menor riesgo de sobredosis que metadona", 
+                 "disponible": true, "farmacias": ["Farmacia del Programa de Adicciones"]}
+            ]
+        };
+
+        // Contraseña para el dueño de farmacia
+        const CONTRASENA_FARMACIA = "12345678";
+
+        // Elementos del DOM
+        const selectionWindow = document.getElementById('selection-window');
+        const btnUser = document.getElementById('btn-user');
+        const btnAdmin = document.getElementById('btn-admin');
+        const passwordModal = document.getElementById('password-modal');
+        const closeModal = document.querySelector('.close');
+        const passwordInput = document.getElementById('password-input');
+        const submitPassword = document.getElementById('submit-password');
+        const errorMessage = document.getElementById('error-message');
+        const userInterface = document.getElementById('user-interface');
+        const pharmacyInterface = document.getElementById('pharmacy-interface');
+        const conditionSelect = document.getElementById('condition-select');
+        const specialistsResults = document.getElementById('specialists-results');
+        const medicationsResults = document.getElementById('medications-results');
+        const backToSelection = document.getElementById('back-to-selection');
+        const pharmacyConditionSelect = document.getElementById('pharmacy-condition-select');
+        const pharmacyMedicationsResults = document.getElementById('pharmacy-medications-results');
+        const pharmacyBackToSelection = document.getElementById('pharmacy-back-to-selection');
+
+        // Event listeners
+        btnUser.addEventListener('click', showUserInterface);
+        btnAdmin.addEventListener('click', showPasswordModal);
+        closeModal.addEventListener('click', () => passwordModal.style.display = 'none');
+        submitPassword.addEventListener('click', verifyPassword);
+        conditionSelect.addEventListener('change', showUserResults);
+        backToSelection.addEventListener('click', showSelectionWindow);
+        pharmacyConditionSelect.addEventListener('change', showPharmacyResults);
+        pharmacyBackToSelection.addEventListener('click', showSelectionWindow);
+
+        // Mostrar modal de contraseña
+        function showPasswordModal() {
+            passwordModal.style.display = 'block';
+            passwordInput.value = '';
+            errorMessage.textContent = '';
+        }
+
+        // Verificar contraseña
+        function verifyPassword() {
+            if (passwordInput.value === CONTRASENA_FARMACIA) {
+                passwordModal.style.display = 'none';
+                showPharmacyInterface();
+            } else {
+                errorMessage.textContent = 'Contraseña incorrecta';
+            }
+        }
+
+        // Mostrar interfaz de usuario
+        function showUserInterface() {
+            selectionWindow.style.display = 'none';
+            userInterface.style.display = 'block';
+            conditionSelect.selectedIndex = 0;
+            specialistsResults.innerHTML = '';
+            medicationsResults.innerHTML = '';
+        }
+
+        // Mostrar interfaz de farmacia
+        function showPharmacyInterface() {
+            selectionWindow.style.display = 'none';
+            pharmacyInterface.style.display = 'block';
+            pharmacyConditionSelect.selectedIndex = 0;
+            pharmacyMedicationsResults.innerHTML = '';
+        }
+
+        // Mostrar ventana de selección
+        function showSelectionWindow() {
+            selectionWindow.style.display = 'block';
+            userInterface.style.display = 'none';
+            pharmacyInterface.style.display = 'none';
+        }
+
+        // Mostrar resultados para usuario
+        function showUserResults() {
+            const condition = conditionSelect.value;
+            
+            if (!condition) {
+                specialistsResults.innerHTML = '';
+                medicationsResults.innerHTML = '';
+                return;
+            }
+            
+            // Mostrar especialistas
+            specialistsResults.innerHTML = '';
+            const specialists = ESPECIALISTAS_ZONA[condition] || [];
+            specialists.forEach(specialist => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<div class="card-title">Especialista</div><p>${specialist}</p>`;
+                specialistsResults.appendChild(card);
+            });
+            
+            // Mostrar medicamentos
+            medicationsResults.innerHTML = '';
+            const medications = MEDICAMENTOS[condition] || [];
+            medications.forEach(med => {
+                const card = document.createElement('div');
+                card.className = `card ${med.disponible ? 'available' : 'unavailable'}`;
+                card.innerHTML = `
+                    <div class="card-title">${med.nombre} - ${med.disponible ? 'Disponible' : 'No disponible'}</div>
+                    <p><strong>Tipo:</strong> ${med.tipo}</p>
+                    <p><strong>Uso:</strong> ${med.uso}</p>
+                    <p><strong>Efectos:</strong> ${med.efectos}</p>
+                    <p><strong>Farmacias:</strong> ${med.farmacias.join(', ')}</p>
+                `;
+                medicationsResults.appendChild(card);
+            });
+        }
+
+        // Mostrar resultados para farmacia
+        function showPharmacyResults() {
+            const condition = pharmacyConditionSelect.value;
+            
+            if (!condition) {
+                pharmacyMedicationsResults.innerHTML = '';
+                return;
+            }
+            
+            // Mostrar medicamentos con opción para cambiar disponibilidad
+            pharmacyMedicationsResults.innerHTML = '';
+            const medications = MEDICAMENTOS[condition] || [];
+            medications.forEach((med, index) => {
+                const card = document.createElement('div');
+                card.className = `card ${med.disponible ? 'available' : 'unavailable'}`;
+                card.innerHTML = `
+                    <div class="card-title">${med.nombre} - ${med.disponible ? 'Disponible' : 'No disponible'}</div>
+                    <p><strong>Tipo:</strong> ${med.tipo}</p>
+                    <p><strong>Uso:</strong> ${med.uso}</p>
+                    <p><strong>Efectos:</strong> ${med.efectos}</p>
+                    <p><strong>Farmacias:</strong> ${med.farmacias.join(', ')}</p>
+                    <button class="toggle-availability" data-condition="${condition}" data-index="${index}">
+                        Cambiar disponibilidad
+                    </button>
+                `;
+                pharmacyMedicationsResults.appendChild(card);
+            });
+            
+            // Añadir event listeners a los botones
+            document.querySelectorAll('.toggle-availability').forEach(button => {
+                button.addEventListener('click', function() {
+                    const condition = this.getAttribute('data-condition');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    MEDICAMENTOS[condition][index].disponible = !MEDICAMENTOS[condition][index].disponible;
+                    showPharmacyResults(); // Actualizar la vista
+                });
+            });
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.addEventListener('click', (event) => {
+            if (event.target === passwordModal) {
+                passwordModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
